@@ -4,16 +4,29 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    [SerializeField]
-    private Transform characterBody;
-    [SerializeField]
-    private Transform cameraArm;
+    [SerializeField] private Transform characterBody;
+    [SerializeField] private Transform cameraArm;
 
-    Animator animator;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float jumpPower = 3.0f;
+    [SerializeField] private float animSpeed = 1.5f;
 
+    private CapsuleCollider collider;
+    private Rigidbody rigidbody;
+    private Animator animator;
+
+
+    static int idleState = Animator.StringToHash ("Base Layer.Idle");
+    static int locoState = Animator.StringToHash ("Base Layer.Locomotion");
+	static int jumpState = Animator.StringToHash ("Base Layer.Jump");
+	static int restState = Animator.StringToHash ("Base Layer.Rest");
+
+    
     void Start()
     {
         animator= characterBody.GetComponent<Animator>();
+        rigidbody = GetComponent<Rigidbody>();
+        collider = GetComponent<CapsuleCollider>();
     }
 
     void Update()
@@ -24,7 +37,16 @@ public class CharacterController : MonoBehaviour
 
     private void Move()
     {
-        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+
+        Vector2 moveInput = new Vector2(h, v);
+
+        animator.SetFloat("Speed", v);
+        animator.SetFloat("Direction", h);
+        animator.speed = animSpeed;
+
+
         bool isMove = moveInput.magnitude != 0; // moveInput = 0 이라면 이동이 없는 것, 0이 아니라면 이동이 있는것이다.
 
         // 걷는 애니메이션 재생
@@ -41,7 +63,7 @@ public class CharacterController : MonoBehaviour
 
             characterBody.forward = lookForward; // 카메라 방향 = 캐릭터의 시선방향 
             // characterBody.forward = moveDir; // 캐릭터의 시선이 자유로움
-            transform.position += moveDir * Time.deltaTime * 5f;
+            transform.position += moveDir * Time.deltaTime * moveSpeed;
         }
 
 
